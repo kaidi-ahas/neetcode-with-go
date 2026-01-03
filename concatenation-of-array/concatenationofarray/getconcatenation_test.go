@@ -55,7 +55,6 @@ func TestGetConcatenation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt := tt // capture the range variable
 			result, err := GetConcatenation(tt.testSlice)
 
 			if tt.wantErr {
