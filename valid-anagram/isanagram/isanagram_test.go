@@ -1,70 +1,108 @@
 package isanagram
 
 import (
+	"errors"
 	"testing"
 )
-
-// What behavior do I want to guarantee never breaks in hasUpperCaseLetter?
-// // The function must reliably detect an uppercase letter
-// What does hasUpperCaseLetter return on success?
-// // Returns true if the string contains at least one uppercase letter, false otherwise
-// What does hasUpperCaseLetter return on failure?
-// // haven't implemented this
-// Contract:
-// // Input: a string
-// // Output: boolean
-// // Failure: not implemented
-func TestHasUpperCaseLetter(t *testing.T) {
-	type Test struct {
-		name  string
-		input string
-		want  bool
-	}
-
-	tests := []Test{
-		{
-			"has uppercase letter",
-			"Dracula",
-			true,
-		},
-		{
-			"no uppercase letter",
-			"morning",
-			false,
-		},
-		{
-			"all uppercase letters",
-			"RUN",
-			true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := hasUpperCaseLetter(tt.input)
-
-			if tt.want != result {
-				t.Errorf("want %v, got %v", tt.want, result)
-				return
-			}
-		})
-	}
-}
 
 // What behavior do I want to guarantee never breaks in IsAnagram?
 // // The function must reliably detect whether two strings are anagrams.
 // What does IsAnagram return on success?
 // // Returns true if the two strings are anagrams.
 // What does IsAnagram return on failure?
-// // false boolean and ErrNilSlice or ErrEmptySlice
+// // error, false
 // Contract:
-// // Input: slice of ints
+// // Input: two strings
 // // Output: boolean, error
-// // Failure: empty or nil slice
+// // Failure: error, false
 func TestIsAnagram(t *testing.T) {
 	type Test struct {
 		name    string
-		input   string
-		wantErr bool
+		s, t    string
+		wantErr error
+		want    bool
+	}
+
+	tests := []Test{
+		{
+			"basic anagram",
+			"silent",
+			"listen",
+			nil,
+			true,
+		},
+		{
+			"single character",
+			"m",
+			"m",
+			nil,
+			true,
+		},
+		{
+			"empty string",
+			"",
+			"hi",
+			ErrEmptyString,
+			false,
+		},
+		{
+			"unequal lengths",
+			"crazy",
+			"craz",
+			ErrUnequalLengths,
+			false,
+		},
+		{
+			"contains numbers",
+			"stuffy123",
+			"stuffy123",
+			ErrInvalidCharacter,
+			false,
+		},
+		{
+			"contains uppercase",
+			"Me",
+			"Me",
+			ErrInvalidCharacter,
+			false,
+		},
+		{
+			"all uppercase",
+			"YAY",
+			"YAY",
+			ErrInvalidCharacter,
+			false,
+		},
+		{
+			"invalid symbol",
+			"hello?",
+			"hello?",
+			ErrInvalidCharacter,
+			false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := IsAnagram(tt.t, tt.s)
+
+			if tt.wantErr != nil {
+				if err == nil {
+					t.Fatalf("expected error: %v, got nil", tt.wantErr)
+				}
+				if !errors.Is(err, tt.wantErr) {
+					t.Fatalf("unexpected error: %v message: %v", tt.wantErr, err)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+
+			if tt.want != got {
+				t.Errorf("want: %v, got: %v", tt.want, got)
+			}
+		})
 	}
 }
