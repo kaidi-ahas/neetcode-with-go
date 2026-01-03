@@ -2,23 +2,16 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"valid-anagram/isanagram"
 )
 
 func main() {
-	myTests := [][]string{
-		{"", "hello"},
-		{"hi", "Hi"},
-		{"t", "T"},
-		{"ih", "hi"},
-		{"thiSisSoDif", "thiSisSoDif"},
-		{"", ""},
-		{"cats", "hamsters"},
-		{"bye", "byee"},
+	ok, err := isanagram.IsAnagram("silent", "listen")
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	for _, v := range myTests {
-		fmt.Println(isanagram.IsAnagram(v[0], v[1]))
-		fmt.Println()
-	}
+	fmt.Println(ok)
 }

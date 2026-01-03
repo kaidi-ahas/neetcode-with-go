@@ -2,56 +2,55 @@ package isanagram
 
 import (
 	"errors"
-	"unicode"
 )
 
-var ErrorEmptyString = "string cannot be empty"
-var ErrorUnequalLengths = "string lengths should be equal"
-var ErrorUpperCaseDetected = "string cannot have any uppercase letters"
-var ErrorWrongCharacter = "only lowercase English letters are allowed"
+var (
+	ErrEmptyString      = errors.New("string cannot be empty")
+	ErrUnequalLengths   = errors.New("string lengths should be equal")
+	ErrInvalidCharacter = errors.New("only lowercase English letters are allowed")
+)
 
-// Space O(1), Time O(n)
-func IsAnagram(s, t string) (error, bool) {
+// IsAnagram reports whether s and t are anagrams.
+// It returns an error if the input is invalid.
+func IsAnagram(s, t string) (bool, error) {
 
-	if hasUpperCaseLetter(s) || hasUpperCaseLetter(t) {
-		return errors.New(ErrorUpperCaseDetected), false
+	if err := validateInput(s, t); err != nil {
+		return false, err
 	}
 
-	if len(s) == 0 || len(t) == 0 {
-		return errors.New(ErrorEmptyString), false
+	var freq [26]int
 
+	for i := 0; i < len(s); i++ {
+		freq[s[i]-'a']++
+		freq[t[i]-'a']--
+	}
+
+	for _, v := range freq {
+		if v != 0 {
+			return false, nil
+		}
+	}
+
+	return true, nil
+}
+
+func validateInput(s, t string) error {
+	if len(s) == 0 || len(t) == 0 {
+		return ErrEmptyString
 	}
 
 	if len(s) != len(t) {
-		return errors.New(ErrorUnequalLengths), false
+		return ErrUnequalLengths
 	}
-
-	if s == t {
-		return nil, true
-	}
-
-	var freq [26]int // for storing the English alphabet 26 letters
 
 	for i := 0; i < len(s); i++ {
-		// only English lowercase letters
-		if s[i] < 'a' || s[i] > 'z' || t[i] < 'a' || t[i] > 'z' {
-			return errors.New(ErrorWrongCharacter), false
+		if !isLowercaseASCII(s[i]) || !isLowercaseASCII(t[i]) {
+			return ErrInvalidCharacter
 		}
-
-		// increment freq value by 1 at the index where a letter from s is
-		freq[s[i]-'a']++
-
-		// decrement freq value by 1 at the index where a letter from t is
-		freq[t[i]-'a']--
 	}
-	return nil, true
+	return nil
 }
 
-func hasUpperCaseLetter(str string) bool {
-	for _, s := range str {
-		if unicode.IsUpper(s) {
-			return true
-		}
-	}
-	return false
+func isLowercaseASCII(b byte) bool {
+	return b >= 'a' && b <= 'z'
 }
